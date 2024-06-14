@@ -1,0 +1,11 @@
+<div class="row">
+    <form action="/hexvis/testVis" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
+</div>
+
+<div class="row">
+{{ map|safe }}
+</div>

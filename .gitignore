@@ -1,0 +1,7 @@
+*.sqlite3
+
+hexvis/__pycache__/*
+hexvis/migrations/*
+
+hexvis/__pycache__/*
+hexvis/migrations/*
