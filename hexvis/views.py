@@ -4,6 +4,10 @@ from django.http import HttpResponse
 from h3 import h3
 import folium
 
+import geopandas as gpd
+import geodatasets
+import h3pandas
+
 def visualize_hexagons(hexagons, color="red", folium_map=None):
     """
     hexagons is a list of hexcluster. Each hexcluster is a list of hexagons. 
@@ -52,6 +56,82 @@ def testVis(request):
     displayContext={}
     h3_address = h3.geo_to_h3(37.3615593, -122.0553238, 9) # lat, lng, hex resolution                                                                                                        
     m = visualize_hexagons([h3_address])
+    displayContext["map"]=m._repr_html_()
+    displayContext["form"]="test"
+    return render(request, "testVis.html", displayContext)
+
+def getFoliumPolygonMap(df, 
+                        location=[40.70, -73.94], 
+                        zoom_start=10, 
+                        tiles="CartoDB positron",
+                        fillColor="orange",
+                        popup="BoroName"):
+    """
+    https://geopandas.org/en/stable/gallery/polygon_plotting_with_folium.html
+    plots example polygon on folium map, using geopandas db
+    GeopandasDB(Polygon) -> Folium Map object
+    df should be a WGS 84 (epsg:4326) geopandas dataframe
+    """
+    m = folium.Map(location=location, zoom_start=zoom_start, tiles=tiles)
+    for _, r in df.iterrows():
+        # Without simplifying the representation of each borough,
+        # the map might not be displayed
+        sim_geo = gpd.GeoSeries(r["geometry"]).simplify(tolerance=0.001)
+        geo_j = sim_geo.to_json()
+        geo_j = folium.GeoJson(data=geo_j, style_function=lambda x: {"fillColor": fillColor})
+        if popup is not None:
+            folium.Popup(r[popup]).add_to(geo_j)
+        geo_j.add_to(m)
+    return m
+
+
+def examplePlottingPolygonFolium():
+    """
+    example
+    https://geopandas.org/en/stable/gallery/polygon_plotting_with_folium.html
+    """
+    path = geodatasets.get_path("nybb")
+    df = gpd.read_file(path)
+    # Use WGS 84 (epsg:4326) as the geographic coordinate system
+    df = df.to_crs(epsg=4326)
+    return getFoliumPolygonMap(df)
+
+
+def geopd(request):
+    m = examplePlottingPolygonFolium()
+    
+    displayContext={}
+    displayContext["map"]=m._repr_html_()
+    displayContext["form"]="test"
+    return render(request, "testVis.html", displayContext)
+
+def getHexifiedFoliumPolygon(df, resolution = 7):
+    """
+    https://stackoverflow.com/questions/63516948/how-to-convert-shapefile-geojson-to-hexagons-using-uber-h3-in-python
+    converts polygon to hex, then plots the hex polygons
+    df must be a geopandas dataframe
+    """
+    # Resample to H3 cells
+    gdf_h3 = df.h3.polyfill_resample(resolution)
+    # Plot H3 as polygons
+    return getFoliumPolygonMap(gdf_h3)
+
+def examplePlottingHexifiedPolygonFolium():
+    """
+    example
+    https://stackoverflow.com/questions/63516948/how-to-convert-shapefile-geojson-to-hexagons-using-uber-h3-in-python
+    https://geopandas.org/en/stable/gallery/polygon_plotting_with_folium.html
+    """
+    path = geodatasets.get_path("nybb")
+    df = gpd.read_file(path)
+    # Use WGS 84 (epsg:4326) as the geographic coordinate system
+    df = df.to_crs(epsg=4326)
+    return getHexifiedFoliumPolygon(df)
+    
+def hexpd(request):
+    m = examplePlottingHexifiedPolygonFolium()
+    
+    displayContext={}
     displayContext["map"]=m._repr_html_()
     displayContext["form"]="test"
     return render(request, "testVis.html", displayContext)
