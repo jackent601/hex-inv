@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+<!--
 <div class="row">
     <form action="/hexvis/testVis" method="post">
         {% csrf_token %}
@@ -5,7 +7,9 @@
         <input type="submit" value="Submit">
     </form>
 </div>
-
+-->
+{% block content %}
 <div class="row">
 {{ map|safe }}
 </div>
+{% endblock %}
