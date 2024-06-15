@@ -7,4 +7,7 @@ urlpatterns = [
     path("testVis", views.testVis, name="testVis"),
     path("geopd", views.geopd, name="geopd"),
     path("hexpd", views.hexpd, name="hexpd"),
+    
+    path("geons", views.geons, name="geons"),
+    path("hexns", views.hexns, name="hexns"),
 ]

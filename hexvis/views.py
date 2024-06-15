@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.conf import settings
+import os
 
 from h3 import h3
 import folium
@@ -7,6 +9,8 @@ import folium
 import geopandas as gpd
 import geodatasets
 import h3pandas
+
+DATA_DIR = os.path.join(settings.BASE_DIR, "hexvis", "datasets")
 
 def visualize_hexagons(hexagons, color="red", folium_map=None):
     """
@@ -85,16 +89,26 @@ def getFoliumPolygonMap(df,
     return m
 
 
-def examplePlottingPolygonFolium():
+def examplePlottingPolygonFolium(datapath=None,
+                                 hexify=False,
+                                 resolution = 7,
+                                 location=[40.70, -73.94], 
+                                 zoom_start=10, 
+                                 tiles="CartoDB positron",
+                                 fillColor="orange",
+                                 popup="BoroName"):
     """
     example
     https://geopandas.org/en/stable/gallery/polygon_plotting_with_folium.html
     """
-    path = geodatasets.get_path("nybb")
-    df = gpd.read_file(path)
+    if datapath is None:
+        datapath = geodatasets.get_path("nybb")
+    df = gpd.read_file(datapath)
     # Use WGS 84 (epsg:4326) as the geographic coordinate system
     df = df.to_crs(epsg=4326)
-    return getFoliumPolygonMap(df)
+    if hexify:
+        df = df.h3.polyfill_resample(resolution)
+    return getFoliumPolygonMap(df, location=location, zoom_start=zoom_start, tiles=tiles, fillColor=fillColor, popup=popup)
 
 
 def geopd(request):
@@ -135,5 +149,31 @@ def hexpd(request):
     displayContext["map"]=m._repr_html_()
     displayContext["form"]="test"
     return render(request, "testVis.html", displayContext)
+
+
+def geons(request):
+    m = examplePlottingPolygonFolium(datapath=os.path.join(DATA_DIR,"iho.zip"),
+                                     location=[56.42, 2.74], 
+                                     zoom_start=6,
+                                     popup=None)
+    
+    displayContext={}
+    displayContext["map"]=m._repr_html_()
+    displayContext["form"]="test"
+    return render(request, "testVis.html", displayContext)
+
+def hexns(request):
+    m = examplePlottingPolygonFolium(datapath=os.path.join(DATA_DIR,"iho.zip"),
+                                     hexify=True,
+                                     resolution=4,
+                                     location=[56.42, 2.74], 
+                                     zoom_start=6,
+                                     popup=None)
+    
+    displayContext={}
+    displayContext["map"]=m._repr_html_()
+    displayContext["form"]="test"
+    return render(request, "testVis.html", displayContext)
+
 
 
