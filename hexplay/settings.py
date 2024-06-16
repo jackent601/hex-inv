@@ -70,6 +70,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'hexplay.wsgi.application'
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'hextest', 
+        'USER': 'postgres',
+        'PASSWORD': 'hextest',
+        'HOST': '127.0.0.1', 
+        'PORT': '5432',
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -83,17 +93,6 @@ WSGI_APPLICATION = 'hexplay.wsgi.application'
 
 
         # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'hextest', 
-        'USER': 'postgres',
-        'PASSWORD': 'hextest',
-        'HOST': '127.0.0.1', 
-        'PORT': '5432',
-    }
-}
 
 
 # Password validation

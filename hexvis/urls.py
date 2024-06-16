@@ -8,5 +8,9 @@ urlpatterns = [
     path("hexpd", views.hexpd, name="hexpd"),
     
     path("geons", views.geons, name="geons"),
-    path("hexns", views.hexns, name="hexns"),
+    # path("hexns", views.hexns, name="hexns"),
+    
+    
+    path("geowreck", views.geowreck, name="geowreck"),
+    # path("hexns", views.hexns, name="hexns"),
 ]
